@@ -4,6 +4,6 @@ using JSOSolvers, NLPModels, SolverTools
 
 using LinearAlgebra, Logging
 
-include("dogleg.jl")
+include("newton_dl.jl")
 
 end # module

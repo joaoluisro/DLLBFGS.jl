@@ -14,7 +14,7 @@ function tests()
     @testset "DL-LBFGS" begin
       for nlp in nlps
         with_logger(NullLogger()) do
-          out = (trust_region(nlp), lbfgs(nlp))
+          out = (newton_dl(nlp), lbfgs(nlp))
           ans = min(out[1].objective, out[2].objective)
           res = out[1].objective
           @test res ≤ ans + abs(ans)*1e-1 + 1e-4
