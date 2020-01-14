@@ -20,7 +20,7 @@ function dogleg(nlp :: AbstractNLPModel,
   (Δ ≤ Δₛ || uᵀu ≥ Δ*Δ) && return -Δ*(g/norm(g))
 
   # if Quasi-Newton's direction is inside the region
-  pᵇ = - B*g
+  pᵇ = - Matrix(B)\g
   dot(pᵇ, pᵇ) ≤ Δ*Δ && return pᵇ
 
   # DogLeg's method
@@ -44,7 +44,7 @@ function dllbfgs(nlp :: AbstractNLPModel;
                  max_tol :: Real = √eps(eltype(x)))
 
   # initilization
-  B = InverseLBFGSOperator(nlp.meta.nvar)
+  B = LBFGSOperator(nlp.meta.nvar)
   g = grad(nlp, x)
   fₓ = obj(nlp, x)
   nrmgrad = norm(g)
