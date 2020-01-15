@@ -39,9 +39,10 @@ end
 
 function dllbfgs(nlp :: AbstractNLPModel;
                  x :: AbstractVector = copy(nlp.meta.x0),
-                 max_time :: Float64 = 3.0,
+                 max_time :: Float64 = 30.0,
                  max_eval :: Int = -1,
-                 max_tol :: Real = √eps(eltype(x)))
+                 abs_tol :: Real = √eps(eltype(x)),
+                 rel_tol :: Real = √eps(eltype(x)))
 
   # initilization
   B = LBFGSOperator(nlp.meta.nvar)
@@ -55,6 +56,7 @@ function dllbfgs(nlp :: AbstractNLPModel;
   start_time = time()
   el_time = 0.0
   tired = el_time > max_time || neval_obj(nlp) ≥ max_eval ≥ 0
+  max_tol = abs_tol + (nrmgrad * rel_tol)
   optimal = nrmgrad < max_tol
 
   @info log_header([:iter, :f, :nrm, :radius, :rho], [Int, T, T, T], hdr_override=Dict(:f => "f(x)",
@@ -77,13 +79,12 @@ function dllbfgs(nlp :: AbstractNLPModel;
 
     if acceptable(tr)
       x += p
+      g = grad(nlp, x)
+      nrmgrad = norm(g)
+      fₓ = obj(nlp, x)
+      push!(B, x - xₖ, g - ∇fₓ)
     end
     update!(tr, norm(p))
-
-    g = grad(nlp, x)
-    nrmgrad = norm(g)
-    fₓ = obj(nlp, x)
-    push!(B, x - xₖ, g - ∇fₓ)
 
     k += 1
     tired = el_time > max_time || neval_obj(nlp) ≥ max_eval ≥ 0
